@@ -94,7 +94,6 @@ const plugins = [
 	'jsx',
 	'typescript',
 	'objectRestSpread',
-	['decorators', { decoratorsBeforeExport: false }],
 	'classProperties',
 	'exportExtensions',
 	'asyncGenerators',
@@ -141,28 +140,27 @@ function loadBabelOpts(opts) {
 		}
 
 		opts[key] = fileOpts[key];
-
-		if (Array.isArray(fileOpts[key]) && Array.isArray(opts.parserOpts[key])) {
-			// combine arrays for plugins
-			opts.parserOpts[key] = opts.parserOpts[key].concat(fileOpts[key]);
-		} else {
-			// because some options need to be passed to parser also
-			opts.parserOpts[key] = fileOpts[key];
-		}
 	}
 
 	return opts;
 }
 
 function literalParser(source, opts, styles) {
+  const originalNodeEnv = process.env.NODE_ENV;
+
+  process.env.NODE_ENV = "development";
+
 	let ast;
 
 	try {
 		ast = parse(source, loadBabelOpts(opts));
 	} catch (ex) {
-		// console.error(ex);
+		console.error(ex);
+
 		return styles || [];
 	}
+
+  process.env.NODE_ENV = originalNodeEnv;
 
 	const specifiers = new Map();
 	const variableDeclarator = new Map();
